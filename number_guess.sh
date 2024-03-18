@@ -17,10 +17,6 @@ USER_ID=$($PSQL "SELECT user_id FROM users WHERE username ILIKE '$USERNAME'")
 # if user do not exist exist
 if [[ -z $USER_ID ]]
 then  
-  # # insert user
-  # INSERT_USER_RESULT=$($PSQL "INSERT INTO users(username) VALUES('$USERNAME')")
-  # # get new user id
-  # USER_ID=$($PSQL "SELECT user_id FROM users WHERE username ILIKE '$USERNAME'")
   echo -e "Welcome, $USERNAME! It looks like this is your first time here."
 else
   GAMES_INFOS=$($PSQL "SELECT COUNT(*) games_played, MIN(guesses) best_game FROM games WHERE  user_id=$USER_ID GROUP BY user_id")
@@ -50,5 +46,16 @@ do
   read USER_INPUT
   GUESSES=$((GUESSES+1))
 done
+
+
+if [[ -z $USER_ID ]]
+then
+# insert user
+INSERT_USER_RESULT=$($PSQL "INSERT INTO users(username) VALUES('$USERNAME')")
+# get new user id
+USER_ID=$($PSQL "SELECT user_id FROM users WHERE username ILIKE '$USERNAME'")
+fi
+
+INSERT_GAME_RESULT=$($PSQL "INSERT INTO games(user_id, guesses) VALUES($USER_ID, $GUESSES)")
 
 echo -e "You guessed it in $GUESSES tries. The secret number was $NUMBER_GUESS. Nice job!"
